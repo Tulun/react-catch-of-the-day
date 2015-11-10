@@ -14,12 +14,25 @@ var createBrowserHistory = require('history/lib/createBrowserHistory')
 
 var h = require('./helpers');
 
+// this is used to sync our state with Firebase
 var Rebase = require('re-base');
 
-// Firebase added here
+// Firebase URL added here
 var base = Rebase.createClass('https://jkaycatch-of-the-day.firebaseio.com/')
 
+/* Use react catalyst in order to get into nested state.
+Unfortunately, React's built into data only gets top level,
+ie for this app: fishes, but not fish1, fish2. We want it to track
+Fish 1 / fish 2. React catalyst is a mixin that goes deeper
+*/
+
+var Catalyst = require('react-catalyst');
+
+// This variable is the main app which displays the order and inventory
 var App = React.createClass({
+
+  mixins : [Catalyst.LinkedStateMixin],
+  // You need to set the initial state for the components in React
   getInitialState : function () {
     return {
       fishes : {},
@@ -27,6 +40,9 @@ var App = React.createClass({
     }
   },
 
+  /* This function runs when the page is finished loading
+  Handles local storage and syncing up with Firebase
+  */
   componentDidMount : function () {
     base.syncState(this.props.params.storeId + '/fishes', {
       context : this,
@@ -43,6 +59,7 @@ var App = React.createClass({
     }
   },
 
+  // This function allows the order to be updated
   componentWillUpdate : function(nextProps, nextState) {
     localStorage.setItem('order-' + this.props.params.storeId, JSON.stringify(nextState.order))
   },
@@ -80,7 +97,7 @@ var App = React.createClass({
           </ul>
         </div>
         <Order fishes={this.state.fishes} order={this.state.order}/>
-        <Inventory addFish={this.addFish} loadSamples = {this.loadSamples} />
+        <Inventory addFish={this.addFish} loadSamples = {this.loadSamples} fishes={this.state.fishes} linkState={this.linkState} />
       </div>
     )
   }
@@ -220,11 +237,31 @@ var Order = React.createClass({
 });
 
 var Inventory = React.createClass({
+
+  renderInventory : function (key) {
+    var linkState = this.props.linkState
+    return (
+      <div className="fish-edit" key={key}>
+        <input type="text" valueLink={linkState('fishes.'+ key + '.name')} />
+        <input type="text" valueLink={linkState('fishes.'+ key + '.price')} />
+        <select valueLink ={linkState('fishes.' + key + '.status')}>
+          <option value ="unavailable"> Sold out! </option>
+          <option value ="unavailable"> Fresh! </option>
+        </select>
+
+        <textarea valueLink={linkState('fishes.' + key + '.desc')}></textarea>
+        <input type="text" valueLink={linkState('fishes.'+ key +'.image')}/>
+        <button>Remove Fish</button>
+
+      </div>
+    )
+  },
+
   render : function() {
     return (
       <div>
         <h2> Inventory </h2>
-
+        {Object.keys(this.props.fishes).map(this.renderInventory)}
         <AddFishForm {...this.props} />
         <button onClick={this.props.loadSamples}> Load Sample Fish</button>
       </div>

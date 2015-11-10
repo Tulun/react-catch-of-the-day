@@ -14,6 +14,11 @@ var createBrowserHistory = require('history/lib/createBrowserHistory')
 
 var h = require('./helpers');
 
+var Rebase = require('re-base');
+
+// Firebase added here
+var base = Rebase.createClass('https://jkaycatch-of-the-day.firebaseio.com/')
+
 var App = React.createClass({
   getInitialState : function () {
     return {
@@ -21,6 +26,27 @@ var App = React.createClass({
       order : {}
     }
   },
+
+  componentDidMount : function () {
+    base.syncState(this.props.params.storeId + '/fishes', {
+      context : this,
+      state : 'fishes'
+    });
+
+    var localStorageRef = localStorage.getItem('order-' + this.props.params.storeId);
+
+    if (localStorageRef) {
+      // update our component state to reflect what's in storage
+      this.setState({
+        order : JSON.parse(localStorageRef)
+      })
+    }
+  },
+
+  componentWillUpdate : function(nextProps, nextState) {
+    localStorage.setItem('order-' + this.props.params.storeId, JSON.stringify(nextState.order))
+  },
+
   addToOrder : function (key) {
     this.state.order[key] = this.state.order[key] + 1 || 1;
     this.setState({ order : this.state.order});
@@ -75,7 +101,7 @@ var Fish = React.createClass({
     var isAvailable = (details.status === 'available' ? true : false);
     var buttonText = (isAvailable ? 'Add to Order' : 'Sold Out!')
     return (
-      <li className = "menu-fish">{this.props.index}
+      <li className = "menu-fish">
         <img src={details.image} alt={details.name} />
         <h3 className="fish-name">
           {details.name}
@@ -156,7 +182,7 @@ var Order = React.createClass({
     }
 
     return (
-      <li>
+      <li key={key}>
         <span>{count}</span> lbs
         {fish.name}
         <span className="price">{h.formatPrice(count * fish.price)}</span>

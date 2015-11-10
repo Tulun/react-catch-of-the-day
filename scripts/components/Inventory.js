@@ -1,5 +1,5 @@
 import React from 'react';
-import AddFishForm from '../components/AddFishForm';
+import AddFishForm from './AddFishForm';
 
 
 var Inventory = React.createClass({

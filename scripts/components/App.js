@@ -1,10 +1,10 @@
 import React from 'react';
 
-import Fish from '../components/Fish';
+import Fish from './Fish';
 
-import Header from '../components/Header';
-import Order from '../components/Order';
-import Inventory from '../components/Inventory';
+import Header from './Header';
+import Order from './Order';
+import Inventory from './Inventory';
 
 // this is used to sync our state with Firebase
 import Rebase from 're-base';

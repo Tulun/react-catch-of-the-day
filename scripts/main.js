@@ -29,6 +29,10 @@ Fish 1 / fish 2. React catalyst is a mixin that goes deeper
 
 var Catalyst = require('react-catalyst');
 
+// Import modules
+
+import NotFound from './components/NotFound';
+
 // This variable is the main app which displays the order and inventory
 var App = React.createClass({
 

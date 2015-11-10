@@ -1,9 +1,10 @@
 import React from 'react';
-import CSSTransitionGroup from 'react-addons-css-transition-group';
-import h from '../helpers';
 
 import Fish from '../components/Fish';
-import AddFishForm from '../components/AddFishForm';
+
+import Header from '../components/Header';
+import Order from '../components/Order';
+import Inventory from '../components/Inventory';
 
 // this is used to sync our state with Firebase
 import Rebase from 're-base';
@@ -112,130 +113,5 @@ var App = React.createClass({
 });
 
 
-/*
-  Header
-*/
-
-var Header = React.createClass({
-  render : function() {
-    return (
-      <header className = "top">
-        <h1> Catch
-          <span className = "ofThe">
-            <span className="of">of</span>
-            <span className="the">the</span>
-          </span>
-          Day</h1>
-        <h3 className="tagline"><span>{this.props.tagline}</span></h3>
-      </header>
-    )
-  },
-
-  propTypes : {
-    tagline : React.PropTypes.string.isRequired
-  }
-});
-
-var Order = React.createClass({
-  renderOrder : function(key) {
-    var fish = this.props.fishes[key];
-    var count = this.props.order[key];
-    var removeButton = <button onClick={this.props.removeFromOrder.bind(null, key)}>&times;</button>
-
-    if(!fish) {
-      return <li key={key}> Sorry, fish no longer available. {removeButton}</li>
-    }
-
-    return (
-      <li key={key}>
-        <span>
-        <CSSTransitionGroup className="count" component="span" transitionName="count"
-         transitionLeaveTimeout={250} transitionEnterTimeout={250}>
-          <span key={count}>{count}</span>
-        </CSSTransitionGroup>
-
-         lbs {fish.name} {removeButton}
-        </span>
-        <span className="price">{h.formatPrice(count * fish.price)}</span>
-      </li>
-    )
-  },
-
-  render : function() {
-    var orderIds = Object.keys(this.props.order);
-    var total = orderIds.reduce((prevTotal, key)=> {
-      var fish = this.props.fishes[key];
-      var count = this.props.order[key];
-      var isAvailable = fish && fish.status === 'available';
-
-      if(fish && isAvailable) {
-        return prevTotal + (count * parseInt(fish.price) || 0);
-      }
-
-      return prevTotal;
-    }, 0);
-
-    return (
-      <div className="order-wrap">
-        <h2 className="order-title"> Your Order </h2>
-        <CSSTransitionGroup className="order" component="ul" transitionName="order"
-         transitionEnterTimeout={500} transitionLeaveTimeout={500}>
-          {orderIds.map(this.renderOrder)}
-          <li className="total">
-            <strong>Total:</strong>
-            {h.formatPrice(total)}
-          </li>
-        </CSSTransitionGroup>
-      </div>
-    )
-  },
-
-  propTypes : {
-    fishes : React.PropTypes.object.isRequired,
-    order : React.PropTypes.object.isRequired,
-    removeFromOrder : React.PropTypes.func.isRequired
-  }
-});
-
-var Inventory = React.createClass({
-
-  renderInventory : function (key) {
-    var linkState = this.props.linkState
-    return (
-      <div className="fish-edit" key={key}>
-        <input type="text" valueLink={linkState('fishes.'+ key + '.name')} />
-        <input type="text" valueLink={linkState('fishes.'+ key + '.price')} />
-        <select valueLink ={linkState('fishes.' + key + '.status')}>
-          <option value ="unavailable"> Sold out! </option>
-          <option value ="unavailable"> Fresh! </option>
-        </select>
-
-        <textarea valueLink={linkState('fishes.' + key + '.desc')}></textarea>
-        <input type="text" valueLink={linkState('fishes.'+ key +'.image')}/>
-        <button onClick={this.props.removeFish.bind(null, key)}>Remove Fish</button>
-
-      </div>
-    )
-  },
-
-  render : function() {
-    return (
-      <div>
-        <h2> Inventory </h2>
-        {Object.keys(this.props.fishes).map(this.renderInventory)}
-        <AddFishForm {...this.props} />
-        <button onClick={this.props.loadSamples}> Load Sample Fish</button>
-      </div>
-    )
-  },
-
-  propTypes : {
-    addFish : React.PropTypes.func.isRequired,
-    loadSamples : React.PropTypes.func.isRequired,
-    fishes : React.PropTypes.object.isRequired,
-    linkState : React.PropTypes.func.isRequired,
-    removeFish : React.PropTypes.func.isRequired
-  }
-});
 
 export default App;

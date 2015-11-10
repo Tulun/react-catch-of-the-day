@@ -1,15 +1,11 @@
 import React from 'react';
+import CSSTransitionGroup from 'react-addons-css-transition-group';
+import h from '../helpers';
 
-var CSSTransitionGroup = require('react-addons-css-transition-group')
-
-
-var h = require('../helpers');
+import AddFishForm from '../components/AddFishForm';
 
 // this is used to sync our state with Firebase
-var Rebase = require('re-base');
-
-// Firebase URL added here
-var base = Rebase.createClass('https://jkaycatch-of-the-day.firebaseio.com/')
+import Rebase from 're-base';
 
 /* Use react catalyst in order to get into nested state.
 Unfortunately, React's built into data only gets top level,
@@ -17,7 +13,11 @@ ie for this app: fishes, but not fish1, fish2. We want it to track
 Fish 1 / fish 2. React catalyst is a mixin that goes deeper
 */
 
-var Catalyst = require('react-catalyst');
+import Catalyst from 'react-catalyst'
+
+// Firebase URL added here
+var base = Rebase.createClass('https://jkaycatch-of-the-day.firebaseio.com/')
+
 // This variable is the main app which displays the order and inventory
 var App = React.createClass({
 
@@ -136,44 +136,6 @@ var Fish = React.createClass({
       </li>
     )
   }
-})
-
-/*
-  Add Fish Form
-*/
-
-var AddFishForm = React.createClass({
-  createFish : function(event) {
-    // Stop the form from submitting
-    event.preventDefault();
-    // Take the data from the fish and create an object
-    var fish = {
-      name : this.refs.name.value,
-      price : this.refs.price.value,
-      status : this.refs.status.value,
-      desc : this.refs.desc.value,
-      image : this.refs.image.value
-    }
-
-    // Add the fish to the app state
-    this.props.addFish(fish);
-    this.refs.fishform.reset();
-  },
-  render : function () {
-    return (
-      <form className="fish-edit" ref="fishForm" onSubmit={this.createFish}>
-        <input type="text" ref="name" placeholder="Fish Name"/>
-        <input type="text" ref="price" placeholder="Fish Price" />
-        <select ref="status">
-          <option value="available">Fresh!</option>
-          <option value="unavailable">Sold Out!</option>
-        </select>
-        <textarea type="text" ref="desc" placeholder="Desc"></textarea>
-        <input type="text" ref="image" placeholder="URL to Image" />
-        <button type="submit">+ Add Item </button>
-      </form>
-    )
-  } 
 })
 
 /*
